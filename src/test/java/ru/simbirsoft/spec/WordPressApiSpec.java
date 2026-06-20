@@ -8,7 +8,7 @@ import ru.simbirsoft.config.TestConfig;
 import static io.restassured.RestAssured.given;
 
 public final class WordPressApiSpec {
-    public WordPressApiSpec() {
+    private WordPressApiSpec() {
     }
 
     public static RequestSpecification authorizedRequest(){

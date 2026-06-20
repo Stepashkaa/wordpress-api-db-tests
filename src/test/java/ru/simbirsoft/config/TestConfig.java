@@ -9,7 +9,7 @@ public final class TestConfig {
     private static final String CONFIG_FILE = "config.properties";
     private static final Properties PROPERTIES = loadProperties();
 
-    public TestConfig() {
+    private TestConfig() {
     }
 
     public static String wordpressBaseUrl(){
