@@ -11,7 +11,7 @@ import java.util.Optional;
 public class PostRepository {
 
     @Step("Получить запись из таблицы wp_posts по ID: {id}")
-    public Optional<PostDbRecord> finalById(int id){
+    public Optional<PostDbRecord> findById(int id){
         String sql = """
                 SELECT ID, post_title, post_content, post_status, post_type
                 FROM wp_posts

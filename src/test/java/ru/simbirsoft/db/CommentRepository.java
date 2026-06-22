@@ -11,7 +11,7 @@ import java.util.Optional;
 public class CommentRepository {
 
     @Step("Получить комментарий из таблицы wp_comments по ID: {id}")
-    public Optional<CommentDbRecord> finalById(int id){
+    public Optional<CommentDbRecord> findById(int id){
         String sql = """
                 SELECT comment_ID, comment_post_ID, comment_author, comment_author_email, comment_content, comment_approved
                 FROM wp_comments
