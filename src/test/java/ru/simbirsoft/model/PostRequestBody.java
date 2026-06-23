@@ -1,6 +1,6 @@
 package ru.simbirsoft.model;
 
-public record PostRequest (
+public record PostRequestBody(
         String title,
         String content,
         String status

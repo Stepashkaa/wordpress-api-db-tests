@@ -1,6 +1,7 @@
 package ru.simbirsoft.db;
 
 import io.qameta.allure.Step;
+import ru.simbirsoft.model.CommentModel;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,7 +12,7 @@ import java.util.Optional;
 public class CommentRepository {
 
     @Step("Получить комментарий из таблицы wp_comments по ID: {id}")
-    public Optional<CommentDbRecord> findById(int id){
+    public Optional<CommentModel> findById(int id){
         String sql = """
                 SELECT comment_ID, comment_post_ID, comment_author, comment_author_email, comment_content, comment_approved
                 FROM wp_comments
@@ -24,7 +25,7 @@ public class CommentRepository {
 
             try (ResultSet resultSet = statement.executeQuery()){
                 if(resultSet.next()){
-                    return Optional.of(new CommentDbRecord(
+                    return Optional.of(new CommentModel(
                             resultSet.getInt("comment_ID"),
                             resultSet.getInt("comment_post_ID"),
                             resultSet.getString("comment_author"),

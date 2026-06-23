@@ -1,6 +1,6 @@
-package ru.simbirsoft.db;
+package ru.simbirsoft.model;
 
-public record PostDbRecord(
+public record PostModel(
         int id,
         String title,
         String content,

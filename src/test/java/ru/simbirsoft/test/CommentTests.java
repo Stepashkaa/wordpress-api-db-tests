@@ -4,8 +4,8 @@ import io.qameta.allure.Epic;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import ru.simbirsoft.db.CommentDbRecord;
-import ru.simbirsoft.model.CommentRequest;
+import ru.simbirsoft.model.CommentModel;
+import ru.simbirsoft.model.CommentRequestBody;
 
 import java.util.List;
 
@@ -54,7 +54,7 @@ class CommentTests extends BaseTest {
     void createComment() {
         int postId = createPublishedPost("Создание комментария D1", "Текст записи D1");
 
-        CommentRequest request = new CommentRequest(
+        CommentRequestBody request = new CommentRequestBody(
                 postId,
                 COMMENT_AUTHOR,
                 COMMENT_EMAIL,
@@ -71,7 +71,7 @@ class CommentTests extends BaseTest {
         int commentId = response.jsonPath().getInt("id");
         rememberCreatedComment(commentId);
 
-        CommentDbRecord comment = commentRepository.findById(commentId)
+        CommentModel comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new AssertionError("Комментарий не найден в wp_comments"));
 
         assertThat(comment.postId()).isEqualTo(postId);
@@ -93,7 +93,7 @@ class CommentTests extends BaseTest {
                 "approved"
         );
 
-        CommentRequest updateRequest = new CommentRequest(
+        CommentRequestBody updateRequest = new CommentRequestBody(
                 null,
                 "Комментатор 2",
                 "autotest.updated@example.com",
@@ -105,7 +105,7 @@ class CommentTests extends BaseTest {
                 .then()
                 .statusCode(HTTP_OK);
 
-        CommentDbRecord comment = commentRepository.findById(commentId)
+        CommentModel comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new AssertionError("Комментарий не найден в wp_comments"));
 
         assertThat(comment.author()).isEqualTo("Комментатор 2");
@@ -141,7 +141,7 @@ class CommentTests extends BaseTest {
         assertThat(apiCommentIds)
                 .doesNotContain(commentId);
 
-        CommentDbRecord comment = commentRepository.findById(commentId)
+        CommentModel comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new AssertionError("Комментарий не найден в wp_comments"));
 
         assertThat(comment.approved()).isEqualTo("trash");
@@ -159,12 +159,12 @@ class CommentTests extends BaseTest {
                 "hold"
         );
 
-        CommentDbRecord pendingComment = commentRepository.findById(commentId)
+        CommentModel pendingComment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new AssertionError("Комментарий не найден в wp_comments"));
 
         assertThat(pendingComment.approved()).isEqualTo("0");
 
-        CommentRequest approveRequest = new CommentRequest(
+        CommentRequestBody approveRequest = new CommentRequestBody(
                 null,
                 null,
                 null,
@@ -176,7 +176,7 @@ class CommentTests extends BaseTest {
                 .then()
                 .statusCode(HTTP_OK);
 
-        CommentDbRecord approvedComment = commentRepository.findById(commentId)
+        CommentModel approvedComment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new AssertionError("Комментарий не найден в wp_comments"));
 
         assertThat(approvedComment.approved()).isEqualTo("1");

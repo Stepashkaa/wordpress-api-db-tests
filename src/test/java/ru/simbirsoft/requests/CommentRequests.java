@@ -3,7 +3,7 @@ package ru.simbirsoft.requests;
 import io.qameta.allure.Step;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
-import ru.simbirsoft.model.CommentRequest;
+import ru.simbirsoft.model.CommentRequestBody;
 
 import static ru.simbirsoft.endpoint.WordPressEndpoints.COMMENTS_ROUTE;
 import static ru.simbirsoft.endpoint.WordPressEndpoints.INDEX;
@@ -21,7 +21,7 @@ public class CommentRequests {
     }
 
     @Step("Создать комментарий")
-    public Response create(CommentRequest request) {
+    public Response create(CommentRequestBody request) {
         return authorizedRequest()
                 .queryParam("rest_route", COMMENTS_ROUTE)
                 .body(request)
@@ -30,7 +30,7 @@ public class CommentRequests {
     }
 
     @Step("Обновить комментарий с ID: {id}")
-    public Response update(int id, CommentRequest request) {
+    public Response update(int id, CommentRequestBody request) {
         return authorizedRequest()
                 .queryParam("rest_route", commentByIdRoute(id))
                 .body(request)

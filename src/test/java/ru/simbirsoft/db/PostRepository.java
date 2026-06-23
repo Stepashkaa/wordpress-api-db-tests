@@ -1,6 +1,7 @@
 package ru.simbirsoft.db;
 
 import io.qameta.allure.Step;
+import ru.simbirsoft.model.PostModel;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,7 +12,7 @@ import java.util.Optional;
 public class PostRepository {
 
     @Step("Получить запись из таблицы wp_posts по ID: {id}")
-    public Optional<PostDbRecord> findById(int id){
+    public Optional<PostModel> findById(int id){
         String sql = """
                 SELECT ID, post_title, post_content, post_status, post_type
                 FROM wp_posts
@@ -24,7 +25,7 @@ public class PostRepository {
 
             try (ResultSet resultSet = statement.executeQuery()){
                 if(resultSet.next()){
-                    return Optional.of(new PostDbRecord(
+                    return Optional.of(new PostModel(
                             resultSet.getInt("ID"),
                             resultSet.getString("post_title"),
                             resultSet.getString("post_content"),

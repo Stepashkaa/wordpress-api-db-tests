@@ -1,6 +1,6 @@
 package ru.simbirsoft.model;
 
-public record PageRequest (
+public record PageRequestBody(
         String title,
         String content,
         String status

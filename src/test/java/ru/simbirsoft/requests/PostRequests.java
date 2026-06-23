@@ -3,7 +3,7 @@ package ru.simbirsoft.requests;
 import io.qameta.allure.Step;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
-import ru.simbirsoft.model.PostRequest;
+import ru.simbirsoft.model.PostRequestBody;
 
 import static ru.simbirsoft.endpoint.WordPressEndpoints.*;
 import static ru.simbirsoft.spec.WordPressApiSpec.authorizedRequest;
@@ -18,7 +18,7 @@ public class PostRequests {
     }
 
     @Step("Создать запись")
-    public Response create(PostRequest request){
+    public Response create(PostRequestBody request){
         return authorizedRequest()
                 .queryParam("rest_route", POSTS_ROUTE)
                 .body(request)
@@ -27,7 +27,7 @@ public class PostRequests {
     }
 
     @Step("Обновить запись с ID: {id}")
-    public Response update(int id, PostRequest request) {
+    public Response update(int id, PostRequestBody request) {
         return authorizedRequest()
                 .queryParam("rest_route", postByIdRoute(id))
                 .body(request)

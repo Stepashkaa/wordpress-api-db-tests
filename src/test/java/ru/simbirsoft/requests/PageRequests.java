@@ -3,7 +3,7 @@ package ru.simbirsoft.requests;
 import io.qameta.allure.Step;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
-import ru.simbirsoft.model.PageRequest;
+import ru.simbirsoft.model.PageRequestBody;
 
 import static ru.simbirsoft.endpoint.WordPressEndpoints.INDEX;
 import static ru.simbirsoft.endpoint.WordPressEndpoints.PAGES_ROUTE;
@@ -21,7 +21,7 @@ public class PageRequests {
     }
 
     @Step("Создать страницу")
-    public Response create(PageRequest request) {
+    public Response create(PageRequestBody request) {
         return authorizedRequest()
                 .queryParam("rest_route", PAGES_ROUTE)
                 .body(request)
@@ -30,7 +30,7 @@ public class PageRequests {
     }
 
     @Step("Обновить страницу с ID: {id}")
-    public Response update(int id, PageRequest request) {
+    public Response update(int id, PageRequestBody request) {
         return authorizedRequest()
                 .queryParam("rest_route", pageByIdRoute(id))
                 .body(request)

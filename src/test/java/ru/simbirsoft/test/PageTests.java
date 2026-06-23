@@ -4,8 +4,8 @@ import io.qameta.allure.Epic;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import ru.simbirsoft.db.PostDbRecord;
-import ru.simbirsoft.model.PageRequest;
+import ru.simbirsoft.model.PostModel;
+import ru.simbirsoft.model.PageRequestBody;
 
 import java.util.List;
 
@@ -44,7 +44,7 @@ class PageTests extends BaseTest {
     @Test
     @DisplayName("TC-WP-PAGE-02: добавление страницы")
     void createPage() {
-        PageRequest request = new PageRequest(
+        PageRequestBody request = new PageRequestBody(
                 "Страница D1",
                 "Текст страницы",
                 "publish"
@@ -59,7 +59,7 @@ class PageTests extends BaseTest {
         int pageId = response.jsonPath().getInt("id");
         rememberCreatedPage(pageId);
 
-        PostDbRecord page = postRepository.findById(pageId)
+        PostModel page = postRepository.findById(pageId)
                 .orElseThrow(() -> new AssertionError("Страница не найдена в wp_posts"));
 
         assertThat(page.title()).isEqualTo("Страница D1");
@@ -73,7 +73,7 @@ class PageTests extends BaseTest {
     void updatePage() {
         int pageId = createPublishedPage("Страница D1", "Текст страницы");
 
-        PageRequest updateRequest = new PageRequest(
+        PageRequestBody updateRequest = new PageRequestBody(
                 "Страница D1 — изменена",
                 "Обновлённый текст",
                 "publish"
@@ -83,7 +83,7 @@ class PageTests extends BaseTest {
                 .then()
                 .statusCode(HTTP_OK);
 
-        PostDbRecord page = postRepository.findById(pageId)
+        PostModel page = postRepository.findById(pageId)
                 .orElseThrow(() -> new AssertionError("Страница не найдена в wp_posts"));
 
         assertThat(page.title()).isEqualTo("Страница D1 — изменена");
@@ -112,7 +112,7 @@ class PageTests extends BaseTest {
         assertThat(apiPageIds)
                 .doesNotContain(pageId);
 
-        PostDbRecord page = postRepository.findById(pageId)
+        PostModel page = postRepository.findById(pageId)
                 .orElseThrow(() -> new AssertionError("Страница не найдена в wp_posts"));
 
         assertThat(page.status()).isEqualTo("trash");

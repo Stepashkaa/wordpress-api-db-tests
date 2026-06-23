@@ -4,8 +4,8 @@ import io.qameta.allure.Epic;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import ru.simbirsoft.db.PostDbRecord;
-import ru.simbirsoft.model.PostRequest;
+import ru.simbirsoft.model.PostModel;
+import ru.simbirsoft.model.PostRequestBody;
 
 import java.util.List;
 
@@ -46,7 +46,7 @@ public class PostTests extends BaseTest{
     @Test
     @DisplayName("TC-WP-POST-02: добавление записи")
     void createPostShouldSavePostInDatabase() {
-        PostRequest request = new PostRequest(
+        PostRequestBody request = new PostRequestBody(
                 "Запись D1",
                 "Текст записи D1",
                 "publish"
@@ -61,7 +61,7 @@ public class PostTests extends BaseTest{
         int postId = response.jsonPath().getInt("id");
         rememberCreatedPost(postId);
 
-        PostDbRecord post = postRepository.findById(postId)
+        PostModel post = postRepository.findById(postId)
                 .orElseThrow(() -> new AssertionError("Запись не найдена в wp_posts"));
 
         assertThat(post.title()).isEqualTo("Запись D1");
@@ -75,7 +75,7 @@ public class PostTests extends BaseTest{
     void updatePost() {
         int postId = createPublishedPost("Запись D1", "Текст записи D1");
 
-        PostRequest updateRequest = new PostRequest(
+        PostRequestBody updateRequest = new PostRequestBody(
                 "Запись D1 — изменена",
                 "Обновлённый текст",
                 "publish"
@@ -85,7 +85,7 @@ public class PostTests extends BaseTest{
                 .then()
                 .statusCode(HTTP_OK);
 
-        PostDbRecord post = postRepository.findById(postId)
+        PostModel post = postRepository.findById(postId)
                 .orElseThrow(() -> new AssertionError("Запись не найдена в wp_posts"));
 
         assertThat(post.title()).isEqualTo("Запись D1 — изменена");
@@ -114,7 +114,7 @@ public class PostTests extends BaseTest{
         assertThat(apiPostIds)
                 .doesNotContain(postId);
 
-        PostDbRecord post = postRepository.findById(postId)
+        PostModel post = postRepository.findById(postId)
                 .orElseThrow(() -> new AssertionError("Запись не найдена в wp_posts"));
 
         assertThat(post.status()).isEqualTo("trash");

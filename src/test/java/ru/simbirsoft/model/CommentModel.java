@@ -1,6 +1,6 @@
-package ru.simbirsoft.db;
+package ru.simbirsoft.model;
 
-public record CommentDbRecord(
+public record CommentModel(
         int id,
         int postId,
         String author,
