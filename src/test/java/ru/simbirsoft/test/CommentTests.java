@@ -33,7 +33,7 @@ class CommentTests extends BaseTest {
                 "approved"
         );
 
-        Response response = commentClient.getAll()
+        Response response = commentRequests.getAll()
                 .then()
                 .statusCode(HTTP_OK)
                 .body("$", not(empty()))
@@ -62,7 +62,7 @@ class CommentTests extends BaseTest {
                 "approved"
         );
 
-        Response response = commentClient.create(request)
+        Response response = commentRequests.create(request)
                 .then()
                 .statusCode(HTTP_CREATED)
                 .extract()
@@ -101,7 +101,7 @@ class CommentTests extends BaseTest {
                 "approved"
         );
 
-        commentClient.update(commentId, updateRequest)
+        commentRequests.update(commentId, updateRequest)
                 .then()
                 .statusCode(HTTP_OK);
 
@@ -126,11 +126,11 @@ class CommentTests extends BaseTest {
                 "approved"
         );
 
-        commentClient.delete(commentId, false)
+        commentRequests.delete(commentId, false)
                 .then()
                 .statusCode(HTTP_OK);
 
-        Response response = commentClient.getAll()
+        Response response = commentRequests.getAll()
                 .then()
                 .statusCode(HTTP_OK)
                 .extract()
@@ -172,7 +172,7 @@ class CommentTests extends BaseTest {
                 "approved"
         );
 
-        commentClient.update(commentId, approveRequest)
+        commentRequests.update(commentId, approveRequest)
                 .then()
                 .statusCode(HTTP_OK);
 

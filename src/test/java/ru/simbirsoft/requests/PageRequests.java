@@ -1,4 +1,4 @@
-package ru.simbirsoft.client;
+package ru.simbirsoft.requests;
 
 import io.qameta.allure.Step;
 import io.restassured.response.Response;
@@ -10,7 +10,7 @@ import static ru.simbirsoft.endpoint.WordPressEndpoints.PAGES_ROUTE;
 import static ru.simbirsoft.endpoint.WordPressEndpoints.pageByIdRoute;
 import static ru.simbirsoft.spec.WordPressApiSpec.authorizedRequest;
 
-public class PageClient {
+public class PageRequests {
 
     @Step("Получить список страниц")
     public Response getAll() {

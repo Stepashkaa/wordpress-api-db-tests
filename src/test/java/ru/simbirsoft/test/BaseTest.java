@@ -2,9 +2,9 @@ package ru.simbirsoft.test;
 
 import io.restassured.response.Response;
 import org.junit.jupiter.api.AfterEach;
-import ru.simbirsoft.client.CommentClient;
-import ru.simbirsoft.client.PageClient;
-import ru.simbirsoft.client.PostClient;
+import ru.simbirsoft.requests.CommentRequests;
+import ru.simbirsoft.requests.PageRequests;
+import ru.simbirsoft.requests.PostRequests;
 import ru.simbirsoft.db.CommentRepository;
 import ru.simbirsoft.db.PostRepository;
 import ru.simbirsoft.model.CommentRequest;
@@ -17,9 +17,9 @@ import java.util.List;
 import static java.net.HttpURLConnection.HTTP_CREATED;
 
 abstract class BaseTest {
-    protected final PostClient postClient = new PostClient();
-    protected final PageClient pageClient = new PageClient();
-    protected final CommentClient commentClient = new CommentClient();
+    protected final PostRequests postRequests = new PostRequests();
+    protected final PageRequests pageRequests = new PageRequests();
+    protected final CommentRequests commentRequests = new CommentRequests();
 
     protected final PostRepository postRepository = new PostRepository();
     protected final CommentRepository commentRepository = new CommentRepository();
@@ -32,15 +32,15 @@ abstract class BaseTest {
     void cleanUp(){
         createdCommentIds.stream()
                 .filter(commentRepository::existsById)
-                .forEach(id -> commentClient.delete(id, true));
+                .forEach(id -> commentRequests.delete(id, true));
 
         createdPageIds.stream()
                 .filter(postRepository::existsById)
-                .forEach(id -> pageClient.delete(id, true));
+                .forEach(id -> pageRequests.delete(id, true));
 
         createdPostIds.stream()
                 .filter(postRepository::existsById)
-                .forEach(id -> postClient.delete(id, true));
+                .forEach(id -> postRequests.delete(id, true));
 
         createdCommentIds.clear();
         createdPageIds.clear();
@@ -48,7 +48,7 @@ abstract class BaseTest {
     }
 
     protected int createPublishedPost(String title, String content){
-        Response response = postClient.create(new PostRequest(title, content, "publish"))
+        Response response = postRequests.create(new PostRequest(title, content, "publish"))
                 .then()
                 .statusCode(HTTP_CREATED)
                 .extract().response();
@@ -58,7 +58,7 @@ abstract class BaseTest {
     }
 
     protected int createPublishedPage(String title, String content){
-        Response response = pageClient.create(new PageRequest(title, content, "publish"))
+        Response response = pageRequests.create(new PageRequest(title, content, "publish"))
                 .then()
                 .statusCode(HTTP_CREATED)
                 .extract().response();
@@ -68,7 +68,7 @@ abstract class BaseTest {
     }
 
     protected int createComment(int postId, String author, String email, String content, String status){
-        Response response = commentClient.create(new CommentRequest(postId, author, email, content, status))
+        Response response = commentRequests.create(new CommentRequest(postId, author, email, content, status))
                 .then()
                 .statusCode(HTTP_CREATED)
                 .extract().response();

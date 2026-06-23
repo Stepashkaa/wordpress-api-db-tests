@@ -27,7 +27,7 @@ public class PostTests extends BaseTest{
     void getPublishedPosts(){
         int createdPostId = createPublishedPost("Запись для списка D1", "Текст записи для списка D1");
 
-        Response response = postClient.getAll()
+        Response response = postRequests.getAll()
                 .then()
                 .statusCode(HTTP_OK)
                 .body("$", not(empty()))
@@ -52,7 +52,7 @@ public class PostTests extends BaseTest{
                 "publish"
         );
 
-        Response response = postClient.create(request)
+        Response response = postRequests.create(request)
                 .then()
                 .statusCode(HTTP_CREATED)
                 .extract()
@@ -81,7 +81,7 @@ public class PostTests extends BaseTest{
                 "publish"
         );
 
-        postClient.update(postId, updateRequest)
+        postRequests.update(postId, updateRequest)
                 .then()
                 .statusCode(HTTP_OK);
 
@@ -99,11 +99,11 @@ public class PostTests extends BaseTest{
     void deletePostToTrash() {
         int postId = createPublishedPost("Запись для удаления D1", "Текст записи для удаления D1");
 
-        postClient.delete(postId, false)
+        postRequests.delete(postId, false)
                 .then()
                 .statusCode(HTTP_OK);
 
-        Response response = postClient.getAll()
+        Response response = postRequests.getAll()
                 .then()
                 .statusCode(HTTP_OK)
                 .extract()

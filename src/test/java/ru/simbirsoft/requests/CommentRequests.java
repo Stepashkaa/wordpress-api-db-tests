@@ -1,4 +1,4 @@
-package ru.simbirsoft.client;
+package ru.simbirsoft.requests;
 
 import io.qameta.allure.Step;
 import io.restassured.response.Response;
@@ -10,7 +10,7 @@ import static ru.simbirsoft.endpoint.WordPressEndpoints.INDEX;
 import static ru.simbirsoft.endpoint.WordPressEndpoints.commentByIdRoute;
 import static ru.simbirsoft.spec.WordPressApiSpec.authorizedRequest;
 
-public class CommentClient {
+public class CommentRequests {
 
     @Step("Получить список комментариев")
     public Response getAll() {

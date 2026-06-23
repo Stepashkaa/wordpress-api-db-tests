@@ -1,4 +1,4 @@
-package ru.simbirsoft.client;
+package ru.simbirsoft.requests;
 
 import io.qameta.allure.Step;
 import io.restassured.response.Response;
@@ -8,7 +8,7 @@ import ru.simbirsoft.model.PostRequest;
 import static ru.simbirsoft.endpoint.WordPressEndpoints.*;
 import static ru.simbirsoft.spec.WordPressApiSpec.authorizedRequest;
 
-public class PostClient {
+public class PostRequests {
     @Step("Получить список записей")
     public Response getAll(){
         return authorizedRequest()

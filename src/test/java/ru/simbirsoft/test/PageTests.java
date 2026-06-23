@@ -25,7 +25,7 @@ class PageTests extends BaseTest {
     void getPublishedPages() {
         int createdPageId = createPublishedPage("Страница для списка D1", "Текст страницы для списка D1");
 
-        Response response = pageClient.getAll()
+        Response response = pageRequests.getAll()
                 .then()
                 .statusCode(HTTP_OK)
                 .body("$", not(empty()))
@@ -50,7 +50,7 @@ class PageTests extends BaseTest {
                 "publish"
         );
 
-        Response response = pageClient.create(request)
+        Response response = pageRequests.create(request)
                 .then()
                 .statusCode(HTTP_CREATED)
                 .extract()
@@ -79,7 +79,7 @@ class PageTests extends BaseTest {
                 "publish"
         );
 
-        pageClient.update(pageId, updateRequest)
+        pageRequests.update(pageId, updateRequest)
                 .then()
                 .statusCode(HTTP_OK);
 
@@ -97,11 +97,11 @@ class PageTests extends BaseTest {
     void deletePageToTrash() {
         int pageId = createPublishedPage("Страница для удаления D1", "Текст страницы для удаления D1");
 
-        pageClient.delete(pageId, false)
+        pageRequests.delete(pageId, false)
                 .then()
                 .statusCode(HTTP_OK);
 
-        Response response = pageClient.getAll()
+        Response response = pageRequests.getAll()
                 .then()
                 .statusCode(HTTP_OK)
                 .extract()
