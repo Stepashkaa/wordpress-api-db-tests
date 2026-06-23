@@ -8,7 +8,7 @@ import ru.simbirsoft.model.CommentRequestBody;
 import static ru.simbirsoft.endpoint.WordPressEndpoints.COMMENTS_ROUTE;
 import static ru.simbirsoft.endpoint.WordPressEndpoints.INDEX;
 import static ru.simbirsoft.endpoint.WordPressEndpoints.commentByIdRoute;
-import static ru.simbirsoft.spec.WordPressApiSpec.authorizedRequest;
+import static ru.simbirsoft.client.WordPressClient.authorizedRequest;
 
 public class CommentRequests {
 

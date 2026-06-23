@@ -8,7 +8,7 @@ import ru.simbirsoft.model.PageRequestBody;
 import static ru.simbirsoft.endpoint.WordPressEndpoints.INDEX;
 import static ru.simbirsoft.endpoint.WordPressEndpoints.PAGES_ROUTE;
 import static ru.simbirsoft.endpoint.WordPressEndpoints.pageByIdRoute;
-import static ru.simbirsoft.spec.WordPressApiSpec.authorizedRequest;
+import static ru.simbirsoft.client.WordPressClient.authorizedRequest;
 
 public class PageRequests {
 

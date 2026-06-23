@@ -1,4 +1,4 @@
-package ru.simbirsoft.spec;
+package ru.simbirsoft.client;
 
 import io.qameta.allure.restassured.AllureRestAssured;
 import io.restassured.http.ContentType;
@@ -7,8 +7,8 @@ import ru.simbirsoft.config.TestConfig;
 
 import static io.restassured.RestAssured.given;
 
-public final class WordPressApiSpec {
-    private WordPressApiSpec() {
+public final class WordPressClient {
+    private WordPressClient() {
     }
 
     public static RequestSpecification authorizedRequest(){

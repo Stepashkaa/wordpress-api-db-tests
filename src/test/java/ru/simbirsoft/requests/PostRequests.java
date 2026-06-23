@@ -6,7 +6,7 @@ import io.restassured.specification.RequestSpecification;
 import ru.simbirsoft.model.PostRequestBody;
 
 import static ru.simbirsoft.endpoint.WordPressEndpoints.*;
-import static ru.simbirsoft.spec.WordPressApiSpec.authorizedRequest;
+import static ru.simbirsoft.client.WordPressClient.authorizedRequest;
 
 public class PostRequests {
     @Step("Получить список записей")
