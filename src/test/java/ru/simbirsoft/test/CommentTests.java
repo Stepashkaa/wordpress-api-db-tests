@@ -20,6 +20,8 @@ class CommentTests extends BaseTest {
 
     private static final String COMMENT_AUTHOR = "Комментатор";
     private static final String COMMENT_EMAIL = "autotest.comment@example.com";
+    private static final String UPDATED_COMMENT_AUTHOR = "Комментатор 2";
+    private static final String UPDATED_COMMENT_EMAIL = "autotest.updated@example.com";
 
     @Test
     @DisplayName("TC-WP-COMMENT-01: получение списка комментариев")
@@ -43,9 +45,11 @@ class CommentTests extends BaseTest {
         List<Integer> apiCommentIds = response.jsonPath().getList("id", Integer.class);
 
         assertThat(apiCommentIds)
+                .as("Должен присутствовать созданный комментарий с ID %s", commentId)
                 .contains(commentId);
 
         assertThat(commentRepository.countAll())
+                .as("В таблице wp_comments должен быть хотя бы один комментарий")
                 .isGreaterThan(0);
     }
 
@@ -74,11 +78,25 @@ class CommentTests extends BaseTest {
         CommentModel comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new AssertionError("Комментарий не найден в wp_comments"));
 
-        assertThat(comment.postId()).isEqualTo(postId);
-        assertThat(comment.author()).isEqualTo(COMMENT_AUTHOR);
-        assertThat(comment.authorEmail()).isEqualTo(COMMENT_EMAIL);
-        assertThat(comment.content()).contains("Комментарий D1");
-        assertThat(comment.approved()).isEqualTo("1");
+        assertThat(comment.postId())
+                .as("Комментарий должен быть привязан к записи с ID %s", postId)
+                .isEqualTo(postId);
+
+        assertThat(comment.author())
+                .as("В БД должно сохраниться имя автора комментария")
+                .isEqualTo(COMMENT_AUTHOR);
+
+        assertThat(comment.authorEmail())
+                .as("В БД должен сохраниться email автора комментария")
+                .isEqualTo(COMMENT_EMAIL);
+
+        assertThat(comment.content())
+                .as("В БД должен сохраниться текст созданного комментария")
+                .contains("Комментарий D1");
+
+        assertThat(comment.approved())
+                .as("Созданный комментарий должен быть одобрен, в БД comment_approved должен быть равен 1")
+                .isEqualTo("1");
     }
 
     @Test
@@ -108,10 +126,21 @@ class CommentTests extends BaseTest {
         CommentModel comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new AssertionError("Комментарий не найден в wp_comments"));
 
-        assertThat(comment.author()).isEqualTo("Комментатор 2");
-        assertThat(comment.authorEmail()).isEqualTo("autotest.updated@example.com");
-        assertThat(comment.content()).contains("Комментарий был изменён");
-        assertThat(comment.approved()).isEqualTo("1");
+        assertThat(comment.author())
+                .as("После редактирования в БД должно обновиться имя автора комментария")
+                .isEqualTo(UPDATED_COMMENT_AUTHOR);
+
+        assertThat(comment.authorEmail())
+                .as("После редактирования в БД должен обновиться email автора комментария")
+                .isEqualTo(UPDATED_COMMENT_EMAIL);
+
+        assertThat(comment.content())
+                .as("После редактирования в БД должен обновиться текст комментария")
+                .contains("Комментарий был изменён");
+
+        assertThat(comment.approved())
+                .as("После редактирования комментарий должен остаться одобренным")
+                .isEqualTo("1");
     }
 
     @Test
@@ -139,12 +168,15 @@ class CommentTests extends BaseTest {
         List<Integer> apiCommentIds = response.jsonPath().getList("id", Integer.class);
 
         assertThat(apiCommentIds)
+                .as("Удалённый комментарий с ID %s не должен отображаться среди активных", commentId)
                 .doesNotContain(commentId);
 
         CommentModel comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new AssertionError("Комментарий не найден в wp_comments"));
 
-        assertThat(comment.approved()).isEqualTo("trash");
+        assertThat(comment.approved())
+                .as("Поле comment_approved должно быть равно trash")
+                .isEqualTo("trash");
     }
 
     @Test
@@ -162,7 +194,9 @@ class CommentTests extends BaseTest {
         CommentModel pendingComment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new AssertionError("Комментарий не найден в wp_comments"));
 
-        assertThat(pendingComment.approved()).isEqualTo("0");
+        assertThat(pendingComment.approved())
+                .as("Перед одобрением комментарий должен быть в ожидания проверки")
+                .isEqualTo("0");
 
         CommentRequestBody approveRequest = new CommentRequestBody(
                 null,
@@ -179,6 +213,8 @@ class CommentTests extends BaseTest {
         CommentModel approvedComment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new AssertionError("Комментарий не найден в wp_comments"));
 
-        assertThat(approvedComment.approved()).isEqualTo("1");
+        assertThat(approvedComment.approved())
+                .as("После одобрения поле comment_approved должно быть равно 1")
+                .isEqualTo("1");
     }
 }

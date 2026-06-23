@@ -35,9 +35,11 @@ class PageTests extends BaseTest {
         List<Integer> apiPageIds = response.jsonPath().getList("id", Integer.class);
 
         assertThat(apiPageIds)
+                .as("Должна присутствовать созданная страница с ID %s", createdPageId)
                 .contains(createdPageId);
 
         assertThat(postRepository.countByTypeAndStatus(PAGE_TYPE, "publish"))
+                .as("В таблице wp_posts должна быть хотя бы одна опубликованная страница")
                 .isGreaterThan(0);
     }
 
@@ -62,10 +64,21 @@ class PageTests extends BaseTest {
         PostModel page = postRepository.findById(pageId)
                 .orElseThrow(() -> new AssertionError("Страница не найдена в wp_posts"));
 
-        assertThat(page.title()).isEqualTo("Страница D1");
-        assertThat(page.content()).contains("Текст страницы");
-        assertThat(page.status()).isEqualTo("publish");
-        assertThat(page.type()).isEqualTo(PAGE_TYPE);
+        assertThat(page.title())
+                .as("В БД должен сохраниться заголовок созданной страницы")
+                .isEqualTo("Страница D1");
+
+        assertThat(page.content())
+                .as("В БД должен сохраниться текст созданной страницы")
+                .contains("Текст страницы");
+
+        assertThat(page.status())
+                .as("Созданная страница должна иметь статус publish")
+                .isEqualTo("publish");
+
+        assertThat(page.type())
+                .as("Созданный объект должен иметь тип page")
+                .isEqualTo(PAGE_TYPE);
     }
 
     @Test
@@ -86,10 +99,21 @@ class PageTests extends BaseTest {
         PostModel page = postRepository.findById(pageId)
                 .orElseThrow(() -> new AssertionError("Страница не найдена в wp_posts"));
 
-        assertThat(page.title()).isEqualTo("Страница D1 — изменена");
-        assertThat(page.content()).contains("Обновлённый текст");
-        assertThat(page.status()).isEqualTo("publish");
-        assertThat(page.type()).isEqualTo(PAGE_TYPE);
+        assertThat(page.title())
+                .as("После редактирования должен обновиться заголовок страницы")
+                .isEqualTo("Страница D1 — изменена");
+
+        assertThat(page.content())
+                .as("После редактирования должен обновиться текст страницы")
+                .contains("Обновлённый текст");
+
+        assertThat(page.status())
+                .as("После редактирования страница должна остаться опубликованной")
+                .isEqualTo("publish");
+
+        assertThat(page.type())
+                .as("После редактирования объект должен остаться страницей с post_type = page")
+                .isEqualTo(PAGE_TYPE);
     }
 
     @Test
@@ -110,12 +134,18 @@ class PageTests extends BaseTest {
         List<Integer> apiPageIds = response.jsonPath().getList("id", Integer.class);
 
         assertThat(apiPageIds)
+                .as("Удалённая страница с ID %s не должна отображаться среди опубликованных страниц", pageId)
                 .doesNotContain(pageId);
 
         PostModel page = postRepository.findById(pageId)
                 .orElseThrow(() -> new AssertionError("Страница не найдена в wp_posts"));
 
-        assertThat(page.status()).isEqualTo("trash");
-        assertThat(page.type()).isEqualTo(PAGE_TYPE);
+        assertThat(page.status())
+                .as("После удаления поле post_status должно быть равно trash")
+                .isEqualTo("trash");
+
+        assertThat(page.type())
+                .as("После удаления в корзину объект должен остаться страницей")
+                .isEqualTo(PAGE_TYPE);
     }
 }

@@ -37,9 +37,11 @@ public class PostTests extends BaseTest{
         List<Integer> apiPostIds = response.jsonPath().getList("id", Integer.class);
 
         assertThat(apiPostIds)
+                .as("Должна присутствовать созданная запись с ID %s", createdPostId)
                 .contains(createdPostId);
 
         assertThat(postRepository.countByTypeAndStatus(POST_TYPE, "publish"))
+                .as("В таблице wp_posts должна быть хотя бы одна опубликованная запись")
                 .isGreaterThan(0);
     }
 
@@ -64,10 +66,21 @@ public class PostTests extends BaseTest{
         PostModel post = postRepository.findById(postId)
                 .orElseThrow(() -> new AssertionError("Запись не найдена в wp_posts"));
 
-        assertThat(post.title()).isEqualTo("Запись D1");
-        assertThat(post.content()).contains("Текст записи D1");
-        assertThat(post.status()).isEqualTo("publish");
-        assertThat(post.type()).isEqualTo(POST_TYPE);
+        assertThat(post.title())
+                .as("В БД должен сохраниться заголовок созданной записи")
+                .isEqualTo("Запись D1");
+
+        assertThat(post.content())
+                .as("В БД должен сохраниться текст созданной записи")
+                .contains("Текст записи D1");
+
+        assertThat(post.status())
+                .as("Созданная запись должна иметь статус publish")
+                .isEqualTo("publish");
+
+        assertThat(post.type())
+                .as("Созданный объект должен иметь тип post")
+                .isEqualTo(POST_TYPE);
     }
 
     @Test
@@ -88,10 +101,21 @@ public class PostTests extends BaseTest{
         PostModel post = postRepository.findById(postId)
                 .orElseThrow(() -> new AssertionError("Запись не найдена в wp_posts"));
 
-        assertThat(post.title()).isEqualTo("Запись D1 — изменена");
-        assertThat(post.content()).contains("Обновлённый текст");
-        assertThat(post.status()).isEqualTo("publish");
-        assertThat(post.type()).isEqualTo(POST_TYPE);
+        assertThat(post.title())
+                .as("После редактирования должен обновиться заголовок записи")
+                .isEqualTo("Запись D1 — изменена");
+
+        assertThat(post.content())
+                .as("После редактирования должен обновиться текст записи")
+                .contains("Обновлённый текст");
+
+        assertThat(post.status())
+                .as("После редактирования запись должна остаться опубликованной")
+                .isEqualTo("publish");
+
+        assertThat(post.type())
+                .as("После редактирования объект должен остаться записью")
+                .isEqualTo(POST_TYPE);
     }
 
     @Test
@@ -112,13 +136,19 @@ public class PostTests extends BaseTest{
         List<Integer> apiPostIds = response.jsonPath().getList("id", Integer.class);
 
         assertThat(apiPostIds)
+                .as("Удалённая запись с ID %s не должна отображаться среди опубликованных", postId)
                 .doesNotContain(postId);
 
         PostModel post = postRepository.findById(postId)
                 .orElseThrow(() -> new AssertionError("Запись не найдена в wp_posts"));
 
-        assertThat(post.status()).isEqualTo("trash");
-        assertThat(post.type()).isEqualTo(POST_TYPE);
+        assertThat(post.status())
+                .as("После удаления поле post_status должно быть равно trash")
+                .isEqualTo("trash");
+
+        assertThat(post.type())
+                .as("После удаления объект должен остаться записью")
+                .isEqualTo(POST_TYPE);
     }
 
 }
