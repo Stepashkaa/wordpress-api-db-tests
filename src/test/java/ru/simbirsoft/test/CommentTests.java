@@ -8,6 +8,7 @@ import ru.simbirsoft.model.CommentModel;
 import ru.simbirsoft.model.CommentRequestBody;
 
 import java.util.List;
+import java.util.Optional;
 
 import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_OK;
@@ -25,7 +26,7 @@ class CommentTests extends BaseTest {
 
     @Test
     @DisplayName("TC-WP-COMMENT-01: получение списка комментариев")
-    void getComments() {
+    void shouldReturnCommentInCommentsList() {
         int postId = createPublishedPost("Запись для комментария D1", "Текст записи для комментария D1");
         int commentId = createComment(
                 postId,
@@ -55,7 +56,7 @@ class CommentTests extends BaseTest {
 
     @Test
     @DisplayName("TC-WP-COMMENT-02: добавление комментария")
-    void createComment() {
+    void shouldCreateCommentAndSaveInDatabase() {
         int postId = createPublishedPost("Создание комментария D1", "Текст записи D1");
 
         CommentRequestBody request = new CommentRequestBody(
@@ -75,8 +76,13 @@ class CommentTests extends BaseTest {
         int commentId = response.jsonPath().getInt("id");
         rememberCreatedComment(commentId);
 
-        CommentModel comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new AssertionError("Комментарий не найден в wp_comments"));
+        Optional<CommentModel> commentFromDb = commentRepository.findById(commentId);
+
+        assertThat(commentFromDb)
+                .as("Комментарий с ID %s должен быть найден в таблице wp_comments после создания", commentId)
+                .isPresent();
+
+        CommentModel comment = commentFromDb.get();
 
         assertThat(comment.postId())
                 .as("Комментарий должен быть привязан к записи с ID %s", postId)
@@ -101,7 +107,7 @@ class CommentTests extends BaseTest {
 
     @Test
     @DisplayName("TC-WP-COMMENT-03: редактирование комментария")
-    void updateComment() {
+    void shouldUpdateCommentInDatabase() {
         int postId = createPublishedPost("Редактирование комментария D1", "Текст записи D1");
         int commentId = createComment(
                 postId,
@@ -123,8 +129,13 @@ class CommentTests extends BaseTest {
                 .then()
                 .statusCode(HTTP_OK);
 
-        CommentModel comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new AssertionError("Комментарий не найден в wp_comments"));
+        Optional<CommentModel> commentFromDb = commentRepository.findById(commentId);
+
+        assertThat(commentFromDb)
+                .as("Комментарий с ID %s должен быть найден в таблице wp_comments после редактирования", commentId)
+                .isPresent();
+
+        CommentModel comment = commentFromDb.get();
 
         assertThat(comment.author())
                 .as("После редактирования в БД должно обновиться имя автора комментария")
@@ -145,7 +156,7 @@ class CommentTests extends BaseTest {
 
     @Test
     @DisplayName("TC-WP-COMMENT-04: удаление комментария в корзину")
-    void deleteCommentToTrash() {
+    void shouldMoveCommentToTrash() {
         int postId = createPublishedPost("Удаления комментария D1", "Текст записи D1");
         int commentId = createComment(
                 postId,
@@ -171,8 +182,13 @@ class CommentTests extends BaseTest {
                 .as("Удалённый комментарий с ID %s не должен отображаться среди активных", commentId)
                 .doesNotContain(commentId);
 
-        CommentModel comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new AssertionError("Комментарий не найден в wp_comments"));
+        Optional<CommentModel> commentFromDb = commentRepository.findById(commentId);
+
+        assertThat(commentFromDb)
+                .as("Комментарий с ID %s должен остаться в таблице wp_comments после перемещения в корзину", commentId)
+                .isPresent();
+
+        CommentModel comment = commentFromDb.get();
 
         assertThat(comment.approved())
                 .as("Поле comment_approved должно быть равно trash")
@@ -181,7 +197,7 @@ class CommentTests extends BaseTest {
 
     @Test
     @DisplayName("TC-WP-COMMENT-05: одобрение комментария")
-    void approvePendingComment() {
+    void shouldApprovePendingComment() {
         int postId = createPublishedPost("Одобрение комментария D1", "Текст записи D1");
         int commentId = createComment(
                 postId,
@@ -191,8 +207,13 @@ class CommentTests extends BaseTest {
                 "hold"
         );
 
-        CommentModel pendingComment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new AssertionError("Комментарий не найден в wp_comments"));
+        Optional<CommentModel> pendingCommentFromDb = commentRepository.findById(commentId);
+
+        assertThat(pendingCommentFromDb)
+                .as("Комментарий с ID %s должен быть найден перед одобрением", commentId)
+                .isPresent();
+
+        CommentModel pendingComment = pendingCommentFromDb.get();
 
         assertThat(pendingComment.approved())
                 .as("Перед одобрением комментарий должен быть в ожидания проверки")
@@ -210,8 +231,13 @@ class CommentTests extends BaseTest {
                 .then()
                 .statusCode(HTTP_OK);
 
-        CommentModel approvedComment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new AssertionError("Комментарий не найден в wp_comments"));
+        Optional<CommentModel> approvedCommentFromDb = commentRepository.findById(commentId);
+
+        assertThat(approvedCommentFromDb)
+                .as("Комментарий с ID %s должен быть найден в БД после одобрения", commentId)
+                .isPresent();
+
+        CommentModel approvedComment = approvedCommentFromDb.get();
 
         assertThat(approvedComment.approved())
                 .as("После одобрения поле comment_approved должно быть равно 1")

@@ -8,6 +8,7 @@ import ru.simbirsoft.model.PostModel;
 import ru.simbirsoft.model.PageRequestBody;
 
 import java.util.List;
+import java.util.Optional;
 
 import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_OK;
@@ -22,7 +23,7 @@ class PageTests extends BaseTest {
 
     @Test
     @DisplayName("TC-WP-PAGE-01: получение списка страниц")
-    void getPublishedPages() {
+    void shouldReturnPageInPagesList() {
         int createdPageId = createPublishedPage("Страница для списка D1", "Текст страницы для списка D1");
 
         Response response = pageRequests.getAll()
@@ -45,7 +46,7 @@ class PageTests extends BaseTest {
 
     @Test
     @DisplayName("TC-WP-PAGE-02: добавление страницы")
-    void createPage() {
+    void shouldCreatePageItInDatabase() {
         PageRequestBody request = new PageRequestBody(
                 "Страница D1",
                 "Текст страницы",
@@ -61,8 +62,13 @@ class PageTests extends BaseTest {
         int pageId = response.jsonPath().getInt("id");
         rememberCreatedPage(pageId);
 
-        PostModel page = postRepository.findById(pageId)
-                .orElseThrow(() -> new AssertionError("Страница не найдена в wp_posts"));
+        Optional<PostModel> pageFromDb = postRepository.findById(pageId);
+
+        assertThat(pageFromDb)
+                .as("Страница с ID %s должна быть найдена в таблице wp_posts после создания", pageId)
+                .isPresent();
+
+        PostModel page = pageFromDb.get();
 
         assertThat(page.title())
                 .as("В БД должен сохраниться заголовок созданной страницы")
@@ -83,7 +89,7 @@ class PageTests extends BaseTest {
 
     @Test
     @DisplayName("TC-WP-PAGE-03: редактирование страницы")
-    void updatePage() {
+    void shouldUpdatePageInDatabase() {
         int pageId = createPublishedPage("Страница D1", "Текст страницы");
 
         PageRequestBody updateRequest = new PageRequestBody(
@@ -96,8 +102,13 @@ class PageTests extends BaseTest {
                 .then()
                 .statusCode(HTTP_OK);
 
-        PostModel page = postRepository.findById(pageId)
-                .orElseThrow(() -> new AssertionError("Страница не найдена в wp_posts"));
+        Optional<PostModel> pageFromDb = postRepository.findById(pageId);
+
+        assertThat(pageFromDb)
+                .as("Страница с ID %s должна быть найдена в таблице wp_posts после редактирования", pageId)
+                .isPresent();
+
+        PostModel page = pageFromDb.get();
 
         assertThat(page.title())
                 .as("После редактирования должен обновиться заголовок страницы")
@@ -118,7 +129,7 @@ class PageTests extends BaseTest {
 
     @Test
     @DisplayName("TC-WP-PAGE-04: удаление страницы в корзину")
-    void deletePageToTrash() {
+    void shouldMovePageToTrash() {
         int pageId = createPublishedPage("Страница для удаления D1", "Текст страницы для удаления D1");
 
         pageRequests.delete(pageId, false)
@@ -137,8 +148,13 @@ class PageTests extends BaseTest {
                 .as("Удалённая страница с ID %s не должна отображаться среди опубликованных страниц", pageId)
                 .doesNotContain(pageId);
 
-        PostModel page = postRepository.findById(pageId)
-                .orElseThrow(() -> new AssertionError("Страница не найдена в wp_posts"));
+        Optional<PostModel> pageFromDb = postRepository.findById(pageId);
+
+        assertThat(pageFromDb)
+                .as("Страница с ID %s должна остаться в таблице wp_posts после удаления", pageId)
+                .isPresent();
+
+        PostModel page = pageFromDb.get();
 
         assertThat(page.status())
                 .as("После удаления поле post_status должно быть равно trash")

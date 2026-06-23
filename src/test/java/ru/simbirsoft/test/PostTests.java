@@ -8,6 +8,7 @@ import ru.simbirsoft.model.PostModel;
 import ru.simbirsoft.model.PostRequestBody;
 
 import java.util.List;
+import java.util.Optional;
 
 import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_OK;
@@ -24,7 +25,7 @@ public class PostTests extends BaseTest{
 
     @Test
     @DisplayName("TC-WP-POST-01: получение списка записей")
-    void getPublishedPosts(){
+    void shouldReturnPostInPostsList(){
         int createdPostId = createPublishedPost("Запись для списка D1", "Текст записи для списка D1");
 
         Response response = postRequests.getAll()
@@ -47,7 +48,7 @@ public class PostTests extends BaseTest{
 
     @Test
     @DisplayName("TC-WP-POST-02: добавление записи")
-    void createPostShouldSavePostInDatabase() {
+    void shouldCreatePostItInDatabase() {
         PostRequestBody request = new PostRequestBody(
                 "Запись D1",
                 "Текст записи D1",
@@ -63,8 +64,13 @@ public class PostTests extends BaseTest{
         int postId = response.jsonPath().getInt("id");
         rememberCreatedPost(postId);
 
-        PostModel post = postRepository.findById(postId)
-                .orElseThrow(() -> new AssertionError("Запись не найдена в wp_posts"));
+        Optional<PostModel> postFromDb = postRepository.findById(postId);
+
+        assertThat(postFromDb)
+                .as("Запись с ID %s должна быть найдена в таблице wp_posts после создания", postId)
+                .isPresent();
+
+        PostModel post = postFromDb.get();
 
         assertThat(post.title())
                 .as("В БД должен сохраниться заголовок созданной записи")
@@ -85,7 +91,7 @@ public class PostTests extends BaseTest{
 
     @Test
     @DisplayName("TC-WP-POST-03: редактирование записи")
-    void updatePost() {
+    void shouldUpdatePostInDatabase() {
         int postId = createPublishedPost("Запись D1", "Текст записи D1");
 
         PostRequestBody updateRequest = new PostRequestBody(
@@ -98,8 +104,13 @@ public class PostTests extends BaseTest{
                 .then()
                 .statusCode(HTTP_OK);
 
-        PostModel post = postRepository.findById(postId)
-                .orElseThrow(() -> new AssertionError("Запись не найдена в wp_posts"));
+        Optional<PostModel> postFromDb = postRepository.findById(postId);
+
+        assertThat(postFromDb)
+                .as("Запись с ID %s должна быть найдена в таблице wp_posts после редактирования", postId)
+                .isPresent();
+
+        PostModel post = postFromDb.get();
 
         assertThat(post.title())
                 .as("После редактирования должен обновиться заголовок записи")
@@ -120,7 +131,7 @@ public class PostTests extends BaseTest{
 
     @Test
     @DisplayName("TC-WP-POST-04: удаление записи в корзину")
-    void deletePostToTrash() {
+    void shouldMovePostToTrash() {
         int postId = createPublishedPost("Запись для удаления D1", "Текст записи для удаления D1");
 
         postRequests.delete(postId, false)
@@ -139,8 +150,13 @@ public class PostTests extends BaseTest{
                 .as("Удалённая запись с ID %s не должна отображаться среди опубликованных", postId)
                 .doesNotContain(postId);
 
-        PostModel post = postRepository.findById(postId)
-                .orElseThrow(() -> new AssertionError("Запись не найдена в wp_posts"));
+        Optional<PostModel> postFromDb = postRepository.findById(postId);
+
+        assertThat(postFromDb)
+                .as("Запись с ID %s должна остаться в таблице wp_posts после удаления", postId)
+                .isPresent();
+
+        PostModel post = postFromDb.get();
 
         assertThat(post.status())
                 .as("После удаления поле post_status должно быть равно trash")
