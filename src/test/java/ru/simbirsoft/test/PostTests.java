@@ -1,0 +1,170 @@
+package ru.simbirsoft.test;
+
+import io.qameta.allure.Epic;
+import io.restassured.response.Response;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import ru.simbirsoft.model.PostModel;
+import ru.simbirsoft.model.PostRequestBody;
+
+import java.util.List;
+import java.util.Optional;
+
+import static java.net.HttpURLConnection.HTTP_CREATED;
+import static java.net.HttpURLConnection.HTTP_OK;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.not;
+import static org.assertj.core.api.Assertions.assertThat;
+
+
+
+@Epic("Задание D1")
+public class PostTests extends BaseTest{
+
+    private static final String POST_TYPE = "post";
+
+    @Test
+    @DisplayName("TC-WP-POST-01: получение списка записей")
+    void shouldReturnPostInPostsList(){
+        int createdPostId = createPublishedPost("Запись для списка D1", "Текст записи для списка D1");
+
+        Response response = postRequests.getAll()
+                .then()
+                .statusCode(HTTP_OK)
+                .body("$", not(empty()))
+                .extract()
+                .response();
+
+        List<Integer> apiPostIds = response.jsonPath().getList("id", Integer.class);
+
+        assertThat(apiPostIds)
+                .as("Должна присутствовать созданная запись с ID %s", createdPostId)
+                .contains(createdPostId);
+
+        assertThat(postRepository.countByTypeAndStatus(POST_TYPE, "publish"))
+                .as("В таблице wp_posts должна быть хотя бы одна опубликованная запись")
+                .isGreaterThan(0);
+    }
+
+    @Test
+    @DisplayName("TC-WP-POST-02: добавление записи")
+    void shouldCreatePostItInDatabase() {
+        PostRequestBody request = new PostRequestBody(
+                "Запись D1",
+                "Текст записи D1",
+                "publish"
+        );
+
+        Response response = postRequests.create(request)
+                .then()
+                .statusCode(HTTP_CREATED)
+                .extract()
+                .response();
+
+        int postId = response.jsonPath().getInt("id");
+        rememberCreatedPost(postId);
+
+        Optional<PostModel> postFromDb = postRepository.findById(postId);
+
+        assertThat(postFromDb)
+                .as("Запись с ID %s должна быть найдена в таблице wp_posts после создания", postId)
+                .isPresent();
+
+        PostModel post = postFromDb.get();
+
+        assertThat(post.title())
+                .as("В БД должен сохраниться заголовок созданной записи")
+                .isEqualTo("Запись D1");
+
+        assertThat(post.content())
+                .as("В БД должен сохраниться текст созданной записи")
+                .contains("Текст записи D1");
+
+        assertThat(post.status())
+                .as("Созданная запись должна иметь статус publish")
+                .isEqualTo("publish");
+
+        assertThat(post.type())
+                .as("Созданный объект должен иметь тип post")
+                .isEqualTo(POST_TYPE);
+    }
+
+    @Test
+    @DisplayName("TC-WP-POST-03: редактирование записи")
+    void shouldUpdatePostInDatabase() {
+        int postId = createPublishedPost("Запись D1", "Текст записи D1");
+
+        PostRequestBody updateRequest = new PostRequestBody(
+                "Запись D1 — изменена",
+                "Обновлённый текст",
+                "publish"
+        );
+
+        postRequests.update(postId, updateRequest)
+                .then()
+                .statusCode(HTTP_OK);
+
+        Optional<PostModel> postFromDb = postRepository.findById(postId);
+
+        assertThat(postFromDb)
+                .as("Запись с ID %s должна быть найдена в таблице wp_posts после редактирования", postId)
+                .isPresent();
+
+        PostModel post = postFromDb.get();
+
+        assertThat(post.title())
+                .as("После редактирования должен обновиться заголовок записи")
+                .isEqualTo("Запись D1 — изменена");
+
+        assertThat(post.content())
+                .as("После редактирования должен обновиться текст записи")
+                .contains("Обновлённый текст");
+
+        assertThat(post.status())
+                .as("После редактирования запись должна остаться опубликованной")
+                .isEqualTo("publish");
+
+        assertThat(post.type())
+                .as("После редактирования объект должен остаться записью")
+                .isEqualTo(POST_TYPE);
+    }
+
+    @Test
+    @DisplayName("TC-WP-POST-04: удаление записи в корзину")
+    void shouldMovePostToTrash() {
+        int postId = createPublishedPost("Запись для удаления D1", "Текст записи для удаления D1");
+
+        postRequests.delete(postId, false)
+                .then()
+                .statusCode(HTTP_OK);
+
+        Response response = postRequests.getAll()
+                .then()
+                .statusCode(HTTP_OK)
+                .extract()
+                .response();
+
+        List<Integer> apiPostIds = response.jsonPath().getList("id", Integer.class);
+
+        assertThat(apiPostIds)
+                .as("Удалённая запись с ID %s не должна отображаться среди опубликованных", postId)
+                .doesNotContain(postId);
+
+        Optional<PostModel> postFromDb = postRepository.findById(postId);
+
+        assertThat(postFromDb)
+                .as("Запись с ID %s должна остаться в таблице wp_posts после удаления", postId)
+                .isPresent();
+
+        PostModel post = postFromDb.get();
+
+        assertThat(post.status())
+                .as("После удаления поле post_status должно быть равно trash")
+                .isEqualTo("trash");
+
+        assertThat(post.type())
+                .as("После удаления объект должен остаться записью")
+                .isEqualTo(POST_TYPE);
+    }
+
+}
