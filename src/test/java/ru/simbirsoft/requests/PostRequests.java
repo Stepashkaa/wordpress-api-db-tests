@@ -48,4 +48,12 @@ public class PostRequests {
                 .when()
                 .delete(INDEX);
     }
+
+    @Step("Получить запись по ID: {id}")
+    public Response getById(int id){
+        return authorizedRequest()
+                .queryParam("rest_route", postByIdRoute(id))
+                .when()
+                .get(INDEX);
+    }
 }
