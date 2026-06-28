@@ -13,7 +13,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 
 @Epic("Задание D2")
-public class D2PostTests extends D2BaseTest{
+public class PostDbDataTests extends DbDataTestBase {
 
     private static final String POST_TITLE = "D2_title";
     private static final String POST_CONTENT = "D2_content";

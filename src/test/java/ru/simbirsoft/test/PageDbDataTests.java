@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 
-public class D2PageTests extends D2BaseTest{
+public class PageDbDataTests extends DbDataTestBase {
 
     private static final String PAGE_TITLE = "D2_title";
     private static final String PAGE_CONTENT = "D2_content";

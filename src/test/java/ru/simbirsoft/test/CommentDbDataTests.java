@@ -1,8 +1,10 @@
 package ru.simbirsoft.test;
 
+import io.restassured.common.mapper.TypeRef;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import ru.simbirsoft.model.CommentResponseDto;
 
 import java.util.List;
 
@@ -11,13 +13,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 
-public class D2CommentTests extends D2BaseTest {
+public class CommentDbDataTests extends DbDataTestBase {
 
     private static final String POST_TITLE = "D2_title";
     private static final String POST_CONTENT = "D2_content";
     private static final String COMMENT_AUTHOR = "D2_author";
-    private static final String COMMENT_EMAIL  = "D2_author_email";
-    private static final String COMMENT_CONTENT  = "D2_content_comment";
+    private static final String COMMENT_EMAIL = "D2_author_email";
+    private static final String COMMENT_CONTENT = "D2_content_comment";
 
     @Test
     @DisplayName("TC-WP-COMMENT-01: получение комментария, созданного в БД")
@@ -31,28 +33,29 @@ public class D2CommentTests extends D2BaseTest {
                 .body("$", not(empty()))
                 .extract().response();
 
-        List<Integer> apiComments = response.jsonPath().getList("id", Integer.class);
+        List<CommentResponseDto> apiComments = response.as(new TypeRef<>() {
+        });
 
-        assertThat(apiComments)
+        CommentResponseDto comment = apiComments.stream()
+                .filter(apiComment -> apiComment.id() == commentId)
+                .findFirst()
+                .orElse(null);
+
+        assertThat(comment)
                 .as("В ответе API должен присутствовать комментарий с ID %s, созданный в БД", commentId)
-                .contains(commentId);
+                .isNotNull();
 
-        Integer actualPostId = response.jsonPath().getInt("find { it.id == " + commentId + " }.post");
-
-        String authorName = response.jsonPath().getString("find { it.id == " + commentId + " }.author_name");
-
-        String actualContent = response.jsonPath().getString("find { it.id == " + commentId + " }.content.rendered");
-
-        assertThat(actualPostId)
+        assertThat(comment.post())
                 .as("Комментарий должен быть связан с записью, созданной в БД")
                 .isEqualTo(postId);
 
-        assertThat(authorName)
+        assertThat(comment.authorName())
                 .as("Имя автора комментария соответствует имени, добавленному в БД")
                 .isEqualTo(COMMENT_AUTHOR);
 
-        assertThat(actualContent)
+        assertThat(comment.content().rendered())
                 .as("Контент комментария соответствует контенту, добавленному в БД")
                 .contains(COMMENT_CONTENT);
+
     }
 }
