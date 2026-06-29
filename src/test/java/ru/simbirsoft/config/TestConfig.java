@@ -36,6 +36,22 @@ public final class TestConfig {
         return getRequiredProperty("db.password");
     }
 
+    public static String yandexDiskBaseUrl(){
+        return getRequiredProperty("yandex.disk.base.url");
+    }
+
+    public static String yandexDiskToken(){
+        return getRequiredProperty("yandex.disk.token");
+    }
+
+    public static String yandexDiskUserLogin(){
+        return getRequiredProperty("yandex.disk.user.login");
+    }
+
+    public static String yandexDiskUserDisplayName(){
+        return getRequiredProperty("yandex.disk.user.display.name");
+    }
+
     private static Properties loadProperties() {
         Properties properties = new Properties();
 
